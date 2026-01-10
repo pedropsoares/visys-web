@@ -1,4 +1,2 @@
-export type WordEntity = {
-  id: string
-  text: string
-}
+export * from './WordEntry';
+export * from './TextEntry';

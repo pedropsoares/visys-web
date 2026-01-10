@@ -1,0 +1,24 @@
+
+.text-interactive {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.text-interactive__container {
+  /* Caso precise de container específico */
+}
+
+.text-interactive__words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  line-height: 1.8;
+}
+
+.text-interactive__button {
+  max-width: 120px;
+}

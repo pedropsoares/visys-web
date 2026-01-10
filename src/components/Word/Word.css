@@ -1,0 +1,39 @@
+
+.word {
+  display: inline;
+  margin-right: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--text-muted);
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.word__punctuation {
+  display: flex;
+  border: none;
+  padding: 0;
+  margin-left: -12px;
+  margin-right: 0;
+  align-items: flex-end;
+  cursor: default;
+  color: var(--success);
+  opacity: 0.85;
+}
+
+.word:hover {
+  color: var(--primary-hover);
+}
+
+.word--LEARNED {
+  color: var(--success);
+}
+.word--LEARNING {
+  color: var(--warning);
+}
+.word--NOT_LEARNED {
+  color: var(--danger);
+}
+.word--selected {
+  border: 2px solid var(--text-muted);
+}

@@ -1,73 +1,148 @@
-# React + TypeScript + Vite
+# Visys Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Visys é um sistema de consciência vocabular em inglês, focado em leitura ativa de textos reais.
+Ele não traduz automaticamente: o aprendizado acontece quando o usuário interpreta, registra e acompanha seu próprio vocabulário.
 
-Currently, two official plugins are available:
+Construído com **React + TypeScript + Vite**, 100% frontend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Leitura de texto em inglês
+- O usuário cola ou digita um texto real.
+- O sistema processa o texto e o exibe de forma interativa.
 
-## Expanding the ESLint configuration
+### Palavras clicáveis
+- Cada palavra pode ser selecionada individualmente.
+- Pontuação é preservada e não tratada como palavra.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Registro manual de significado
+- Ao clicar em uma palavra, abre-se um modal flutuante.
+- O usuário escreve o significado com suas próprias palavras.
+- **Não há tradução automática.**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Classificação de aprendizado
+- 🔴 Não aprendida
+- 🟡 Em aprendizado
+- 🟢 Aprendida
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Persistência de progresso
+- Palavras, significados e status são salvos no Firestore.
+- Cache em memória evita leituras desnecessárias durante a sessão.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Resumo de estatísticas
+- Total de palavras
+- Distribuição por status
+
+### Interface moderna
+- Tema escuro
+- CSS com variáveis customizadas
+- Componentes simples e responsivos
+
+---
+
+## Estrutura de Pastas
+
+```
+src/
+  app/                # App principal e rotas
+  components/         # Componentes reutilizáveis
+  domain/             # Entidades e enums de negócio
+  hooks/              # Hooks customizados de estado
+  pages/              # Páginas (Home, TextInteractive)
+  services/           # Processamento de texto
+  storage/            # Integração com Firestore
+  styles/             # Estilos globais e tema
+  main.tsx            # Entry point
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
+
+## Instalação e Uso
+
+1. **Clone o repositório**
+
+```bash
+git clone <repo-url>
+cd visys-web
+```
+
+2. **Instale as dependências**
+
+```bash
+yarn
+# ou npm install
+```
+
+3. **Configure o Firebase**
+
+Crie um arquivo `.env`:
+
+```
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+4. **Rode o projeto**
+
+```bash
+yarn dev
+```
+
+Acesse:
+👉 http://localhost:5173
+
+---
+
+## Principais Componentes
+
+- **Home**: Entrada de texto e visão geral.
+- **TextInteractive**: Texto renderizado palavra por palavra.
+- **Word**: Representação visual de uma palavra.
+- **WordModal**: Modal flutuante para registrar significado e definir status de aprendizado.
+- **StatsSummary**: Estatísticas de vocabulário.
+
+---
+
+## Persistência (Firestore)
+
+- Firestore é usado como banco principal.
+- Não há backend intermediário.
+- Regras simples para desenvolvimento:
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
 ```
+
+---
+
+## Scripts
+
+- `yarn dev` — desenvolvimento
+- `yarn build` — build de produção
+- `yarn lint` — lint
+
+---
+
+## Filosofia do Projeto
+
+Visys não ensina inglês.
+Ele cria consciência vocabular a partir de textos reais.
+
+O aprendizado acontece quando o usuário:
+- lê
+- percebe
+- interpreta
+- registra
+- acompanha

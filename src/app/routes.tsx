@@ -1,7 +1,12 @@
-import React from 'react'
+import { Routes, Route } from 'react-router-dom';
+import { Home } from '../pages/Home';
+import { TextInteractive } from '../pages/TextInteractive';
 
-const Routes: React.FC = () => {
-  return null
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/text" element={<TextInteractive />} />
+    </Routes>
+  );
 }
-
-export default Routes
