@@ -63,7 +63,7 @@ export function WordModal({ word, onClose, onSaved }: Props) {
         </div>
 
         <button className="word-modal__close" onClick={onClose}>
-          Close
+          Fechar
         </button>
       </div>
     </div>

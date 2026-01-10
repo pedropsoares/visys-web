@@ -10,7 +10,7 @@
   /* Text */
   --text: #e6e8f0;
   --text-muted: #a1a6c3;
-  --text-subtle: #7c81a3;
+  --primary-hover: #7c81a3;
 
   /* Primary (azul Visys) */
   --primary: #4f6df5;
@@ -36,6 +36,7 @@ body {
 
 .page {
   margin: 40px;
+  height: 1px;
 }
 
 button {
@@ -51,7 +52,3 @@ button:hover {
   cursor: pointer;
 }
 
-h1 {
-  margin-bottom: 16px;
-  color: var(--primary);
-}
