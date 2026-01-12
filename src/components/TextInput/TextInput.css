@@ -1,0 +1,16 @@
+
+.text-input {
+  width: 100%;
+  min-height: 160px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.text-input__label {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}

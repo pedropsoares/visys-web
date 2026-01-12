@@ -1,0 +1,45 @@
+.text-interactive {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+}
+
+.text-interactive__words {
+  display: flex;
+  flex-wrap: wrap;
+  line-height: 1.8;
+  padding-bottom: 53px;
+}
+
+.text-interactive__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-button {
+  max-width: 120px;
+}
+
+.text-interactive__button__translate-button {
+  position: fixed;
+  bottom: 24px;
+  right: 60px;
+  z-index: 1000;
+  width: 10%;
+  font-size: 16px;
+
+  color: var(--text);
+  background: var(--success);
+}
+
+.text-interactive__button::disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+
+
+}
