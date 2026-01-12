@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllContexts } from '../storage/contextRepository';
+import { fetchAllContexts } from '../services/contextService';
 import type { ContextPhrase } from '../domain/entities';
 
 export function useContexts() {
@@ -8,7 +8,7 @@ export function useContexts() {
 
   useEffect(() => {
     if (loaded) return;
-    getAllContexts().then((data) => {
+    fetchAllContexts().then((data) => {
       setContexts(data);
       setLoaded(true);
     });
