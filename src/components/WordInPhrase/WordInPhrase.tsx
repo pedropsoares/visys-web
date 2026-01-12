@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { WordStatus } from '../../domain/enums';
-import { fetchWord, persistWord } from '../../services/wordService';
-import type { Word } from '../../domain/entities';
+import { getWord, saveWord } from '../../storage/wordRepository';
+import type { Word } from '../../domain/entities/WordEntry';
 
 import './WordInPhrase.css';
 
@@ -20,7 +20,7 @@ export function WordInPhrase({ word }: Props) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const existing = await fetchWord(word);
+      const existing = await getWord(word);
       if (existing) {
         setDisplayTranslation(existing.translation ?? '-');
         setInputTranslation(existing.translation ?? '');
@@ -65,7 +65,7 @@ export function WordInPhrase({ word }: Props) {
       status,
       updatedAt: Date.now(),
     };
-    await persistWord(data);
+    await saveWord(data);
     setDisplayTranslation(trimmed || '-');
     setIsOpen(false);
   }

@@ -3,10 +3,7 @@ import { WordStatus } from '../../domain/enums';
 
 import './ContextPhraseModal.css';
 import type { ContextPhrase } from '../../domain/entities';
-import {
-  fetchContext,
-  persistContextPhrase,
-} from '../../services/contextService';
+import { getContext, saveContextPhrase } from '../../storage/contextRepository';
 import { WordInPhrase } from '../WordInPhrase/WordInPhrase';
 import type { ContextSignals } from '../../services/contextSignalsService';
 
@@ -73,7 +70,7 @@ export function ContextPhraseModal({
   useEffect(() => {
     if (!contextPhaseId) return;
     async function loadContext() {
-      const context = await fetchContext(contextPhaseId);
+      const context = await getContext(contextPhaseId);
       setTranslation(context?.translation ?? '');
     }
     loadContext();
@@ -93,7 +90,7 @@ export function ContextPhraseModal({
       normalizedText: normalized,
       tokenCount: phrase.length,
     };
-    await persistContextPhrase(data);
+    await saveContextPhrase(data);
 
 
     onSaved({

@@ -47,8 +47,8 @@
 
 
 .word--context-recommended {
-  color: #7c4dff;
-  border-color: #7c4dff;
+  color: var(--warning);
+  border-color: var(--warning);
 }
 
 .word--context-recommended::before {
@@ -59,7 +59,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #7c4dff;
+  background: var(--warning);
   color: var(--surface);
   font-size: 11px;
   display: flex;
