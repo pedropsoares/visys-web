@@ -4,7 +4,6 @@ import type { Word } from '../domain/entities';
 
 const wordsCollection = collection(db, 'words');
 
-// Cache simples em memória
 const wordCache = new Map<string, Word | null>();
 
 function normalizeKey(text: string) {

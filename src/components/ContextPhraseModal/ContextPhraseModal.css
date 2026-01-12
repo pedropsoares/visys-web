@@ -1,5 +1,4 @@
-
-.word-modal__overlay {
+.phrase-modal__overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
@@ -10,30 +9,34 @@
   z-index: 1000;
 }
 
-.word-modal {
+.phrase-modal {
   background: var(--surface);
   border: 1px solid var(--border);
+  min-width: 500px;
   border-radius: 12px;
   padding: 20px;
-  width: 100%;
-  max-width: 420px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.word-modal__title {
+.phrase-container {
+  display: flex;
+  gap: 16px;
+}
+
+.phrase-modal__title {
   margin: 0;
   font-size: 18px;
   color: var(--text);
 }
 
-.word-modal__loading {
+.phrase-modal__loading {
   color: var(--muted);
 }
 
-.word-modal__input {
+.phrase-modal__input {
   width: 100%;
   resize: none;
   padding: 10px;
@@ -44,47 +47,72 @@
   font-size: 14px;
 }
 
-.word-modal__input::placeholder {
+.phrase-modal__input::placeholder {
   color: var(--muted);
 }
 
-.word-modal__context-alert {
+.phrase-modal__copy {
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.phrase-modal__copy:hover {
+  border-color: var(--blue);
+}
+
+.phrase-modal__copy:active {
+  transform: scale(0.98);
+  border-color: var(--primary);
+}
+
+.phrase-modal__copy:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.phrase-modal__context-alert {
   border: 1px solid var(--warning);
   border-radius: 10px;
   padding: 10px;
   background: rgba(255, 193, 7, 0.08);
 }
 
-.word-modal__context-title {
+.phrase-modal__context-title {
   margin: 0 0 6px 0;
   color: var(--warning);
   font-size: 14px;
 }
 
-.word-modal__context-reasons {
+.phrase-modal__context-reasons {
   margin: 0;
   padding-left: 18px;
   color: var(--text);
   font-size: 13px;
 }
 
-.word-modal__status-group {
+.phrase-modal__status-group {
   display: flex;
   gap: 8px;
 }
 
-.word-modal__status-group-button {
+.phrase-modal__status-group-button {
   font-size: 18px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 6px;
   cursor: pointer;
 }
-.word-modal__status-group-button:hover {
+
+.phrase-modal__status-group-button:hover {
   border-color: var(--blue);
 }
 
-.word-modal__close {
+.phrase-modal__close {
   align-self: flex-end;
   background: transparent;
   border: none;
