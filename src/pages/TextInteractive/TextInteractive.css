@@ -11,8 +11,8 @@
 .text-interactive__words {
   display: flex;
   flex-wrap: wrap;
-  line-height: 1.8;
-  padding-bottom: 53px;
+  line-height: 24px;
+  padding-bottom: 24px;
 }
 
 .text-interactive__header {
@@ -21,18 +21,16 @@
   align-items: center;
 }
 
+.text-interactive__footer{
+  display: flex;
+  justify-content: space-between;
+}
+
 .back-button {
   max-width: 120px;
 }
 
 .text-interactive__button__translate-button {
-  position: fixed;
-  bottom: 24px;
-  right: 60px;
-  z-index: 1000;
-  width: 10%;
-  font-size: 16px;
-
   color: var(--text);
   background: var(--success);
 }
@@ -42,4 +40,26 @@
   opacity: 0.6;
 
 
+}
+
+.text-interactive__finish {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 6px;
+  cursor: pointer;
+
+}
+
+.text-interactive__finish:hover {
+  border-color: var(--danger) !important;
+  box-shadow:
+    0 0 12px rgba(255, 77, 79, 0.6),
+    0 0 24px rgba(255, 77, 79, 0.35);
+}
+
+.text-interactive__finish:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }

@@ -9,6 +9,10 @@ import {
 } from '../../services/contextService';
 import { WordInPhrase } from '../WordInPhrase/WordInPhrase';
 import type { ContextSignals } from '../../services/contextSignalsService';
+import { TranslationButton } from '../TranslationButton/TranslationButton';
+import { ReasonList } from '../ReasonList/ReasonList';
+import { TranslationUsageCounter } from '../TranslationUsageCounter/TranslationUsageCounter';
+import { getTranslationUsage } from '../../services/translationUsageService';
 
 export type ContextPhraseResult = {
   contextId: string;
@@ -45,30 +49,10 @@ export function ContextPhraseModal({
   onSaved,
 }: Props) {
   const [translation, setTranslation] = useState<string | null>('');
+  const [usageTotal, setUsageTotal] = useState(() => getTranslationUsage());
+  const hasSavedTranslation = Boolean(translation?.trim());
 
-  function renderReason(reason: string) {
-    const separatorIndex = reason.indexOf(': ');
-    if (separatorIndex === -1) {
-      return reason;
-    }
-    const label = reason.slice(0, separatorIndex);
-    const detail = reason.slice(separatorIndex + 2);
-    return (
-      <>
-        <strong>{label}</strong>: {detail}
-      </>
-    );
-  }
-
-  async function handleCopyPhrase() {
-    const text = phrase.join(' ');
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Clipboard may be blocked; ignore silently.
-    }
-  }
+  const phraseText = phrase.join(' ');
 
   useEffect(() => {
     if (!contextPhaseId) return;
@@ -113,24 +97,28 @@ export function ContextPhraseModal({
           ))}
         </div>
 
-        <button
-          type="button"
-          className="phrase-modal__copy"
-          onClick={handleCopyPhrase}
-        >
-          Copiar frase (EN)
-        </button>
+        <TranslationButton
+          text={phraseText}
+          className="phrase-modal__translate"
+          onTranslated={setTranslation}
+          onUsageChange={setUsageTotal}
+          disabled={hasSavedTranslation}
+        />
+
+        <TranslationUsageCounter
+          totalChars={usageTotal}
+          className="phrase-modal__usage"
+        />
 
         {signals && signals.reasons.length > 0 && (
           <div className="phrase-modal__context-alert">
             <p className="phrase-modal__context-title">
               Contexto recomendado
             </p>
-            <ul className="phrase-modal__context-reasons">
-              {signals.reasons.map((reason) => (
-                <li key={reason}>{renderReason(reason)}</li>
-              ))}
-            </ul>
+            <ReasonList
+              reasons={signals.reasons}
+              className="phrase-modal__context-reasons"
+            />
           </div>
         )}
 
@@ -151,19 +139,22 @@ export function ContextPhraseModal({
             className="phrase-modal__status-group-button"
             onClick={() => handleSave(WordStatus.NOT_LEARNED)}
           >
-            🔴
+            <span className="phrase-modal__status-dot phrase-modal__status-dot--not-learned" />
+            Não aprendida
           </button>
           <button
             className="phrase-modal__status-group-button"
             onClick={() => handleSave(WordStatus.LEARNING)}
           >
-            🟡
+            <span className="phrase-modal__status-dot phrase-modal__status-dot--learning" />
+            Aprendendo
           </button>
           <button
             className="phrase-modal__status-group-button"
             onClick={() => handleSave(WordStatus.LEARNED)}
           >
-            🟢
+            <span className="phrase-modal__status-dot phrase-modal__status-dot--learned" />
+            Aprendida
           </button>
         </div>
 

@@ -5,6 +5,10 @@ import { extractWords } from '../../services/textProcessingService';
 import { WordModal } from '../../components/WordModal/WordModal';
 import { Word } from '../../components/Word';
 import { useWordsMap } from '../../hooks/useWordsMap';
+import { TranslationUsageCounter } from '../../components/TranslationUsageCounter/TranslationUsageCounter';
+import { useTranslationUsage } from '../../hooks/useTranslationUsage';
+import { useActiveText } from '../../hooks/useActiveText';
+import { removeActiveText } from '../../services/textService';
 
 import './TextInteractive.css';
 import { ContextPhraseModal } from '../../components/ContextPhraseModal/ContextPhraseModal';
@@ -22,7 +26,9 @@ import {
 export function TextInteractive() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const words = extractWords(state.text);
+  const { activeText } = useActiveText();
+  const rawText = state?.text ?? activeText?.rawText ?? '';
+  const words = extractWords(rawText);
 
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
   const [contextsByIndex, setContextsByIndex] = useState<
@@ -36,6 +42,7 @@ export function TextInteractive() {
   }
   const { wordsMap, upsertWord } = useWordsMap();
   const contexts = useContexts();
+  const translationUsage = useTranslationUsage();
 
   useWordContexts(words, contexts, setContextsByIndex);
 
@@ -107,6 +114,11 @@ export function TextInteractive() {
     setSelectedIndexes([]);
   }
 
+  async function handleFinishText() {
+    await removeActiveText();
+    navigate('/');
+  }
+
   const selectedWords = selectedIndexes
     .sort((a, b) => a - b)
     .map((i) => words[i]);
@@ -120,6 +132,7 @@ export function TextInteractive() {
           >
             Voltar
           </button>
+          <TranslationUsageCounter totalChars={translationUsage} />
         </div>
 
         <div className="text-interactive__words">
@@ -140,13 +153,23 @@ export function TextInteractive() {
           })}
         </div>
 
-        <button
-          className="text-interactive__button__translate-button"
-          disabled={selectedIndexes.length === 0}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Traduzir seleção
-        </button>
+        <div className="text-interactive__footer">
+          <button
+            className="text-interactive__finish"
+            onClick={handleFinishText}
+            disabled={!activeText}
+          >
+            Concluir texto
+          </button>
+
+          <button
+            className="text-interactive__button__translate-button"
+            disabled={selectedIndexes.length === 0}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Traduzir seleção
+          </button>
+        </div>
 
         {isModalOpen &&
           (selectedIndexes.length === 1 ? (

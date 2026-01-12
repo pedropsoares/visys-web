@@ -45,6 +45,10 @@ Construído com **React + TypeScript + Vite**, 100% frontend.
 - Palavras, significados e status são salvos no Firestore.
 - Cache em memória evita leituras desnecessárias durante a sessão.
 
+### Tradução via BFF
+- Para evitar expor chaves no frontend, a tradução usa um BFF (visys-bff).
+- O frontend chama `VITE_TRANSLATION_ENDPOINT` apontando para o BFF.
+
 ### Resumo de estatísticas
 - Total de palavras
 - Distribuição por status
@@ -70,6 +74,20 @@ src/
   styles/             # Estilos globais e tema
   main.tsx            # Entry point
 ```
+
+---
+
+## BFF (visys-bff)
+
+O BFF roda separado do frontend e expõe o endpoint `POST /translate` para uso do DeepL.
+
+Configuração rápida:
+
+```
+VITE_TRANSLATION_ENDPOINT=http://localhost:8787/translate
+```
+
+Veja detalhes em `visys-bff/README.md`.
 
 ---
 

@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { TextInput } from '../../components/TextInput';
 import { StatsSummary } from '../../components/StatsSummary/StatsSummary';
 import { useWordStats } from '../../hooks/useWordStats';
+import { TranslationUsageCounter } from '../../components/TranslationUsageCounter/TranslationUsageCounter';
+import { useTranslationUsage } from '../../hooks/useTranslationUsage';
+import { useActiveText } from '../../hooks/useActiveText';
+import { persistActiveText } from '../../services/textService';
 
 import './Home.css';
 
@@ -10,10 +14,14 @@ export function Home() {
   const [text, setText] = useState('');
   const navigate = useNavigate();
   const stats = useWordStats();
+  const translationUsage = useTranslationUsage();
+  const { activeText, loading } = useActiveText();
 
   function handleSubmit() {
     if (!text.trim()) return;
-    navigate('/text', { state: { text } });
+    persistActiveText(text).then(() => {
+      navigate('/text', { state: { text } });
+    });
   }
 
   return (
@@ -25,9 +33,37 @@ export function Home() {
 
       <StatsSummary learned={stats.learned} learning={stats.learning} />
 
-      <TextInput value={text} onChange={setText} />
+      <TranslationUsageCounter totalChars={translationUsage} />
 
-      <button onClick={handleSubmit}>Analisar texto</button>
+      {activeText && (
+        <div className="home__active-text">
+          <p className="home__active-text-title">
+            Você tem um texto em andamento
+          </p>
+          <p className="home__active-text-preview">
+            {activeText.rawText.slice(0, 180)}
+            {activeText.rawText.length > 180 ? '…' : ''}
+          </p>
+          <button
+            className="home__active-text-button"
+            onClick={() =>
+              navigate('/text', { state: { text: activeText.rawText } })
+            }
+          >
+            Continuar texto
+          </button>
+        </div>
+      )}
+
+      <TextInput
+        value={text}
+        onChange={setText}
+        disabled={Boolean(activeText)}
+      />
+
+      <button onClick={handleSubmit} disabled={Boolean(activeText) || loading}>
+        Analisar texto
+      </button>
     </div>
   );
 }

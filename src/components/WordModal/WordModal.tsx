@@ -3,6 +3,10 @@ import { WordStatus } from '../../domain/enums';
 import { fetchWord, persistWord } from '../../services/wordService';
 import type { Word } from '../../domain/entities';
 import type { ContextSignals } from '../../services/contextSignalsService';
+import { TranslationButton } from '../TranslationButton/TranslationButton';
+import { ReasonList } from '../ReasonList/ReasonList';
+import { TranslationUsageCounter } from '../TranslationUsageCounter/TranslationUsageCounter';
+import { getTranslationUsage } from '../../services/translationUsageService';
 
 import './WordModal.css';
 
@@ -16,6 +20,8 @@ interface Props {
 export function WordModal({ word, signals, onClose, onSaved }: Props) {
   const [translation, setTranslation] = useState('');
   const [loading, setLoading] = useState(true);
+  const [usageTotal, setUsageTotal] = useState(() => getTranslationUsage());
+  const hasSavedTranslation = Boolean(translation.trim());
 
   const load = useCallback(async () => {
     try {
@@ -42,20 +48,6 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
     onClose();
   }
 
-  function renderReason(reason: string) {
-    const separatorIndex = reason.indexOf(': ');
-    if (separatorIndex === -1) {
-      return reason;
-    }
-    const label = reason.slice(0, separatorIndex);
-    const detail = reason.slice(separatorIndex + 2);
-    return (
-      <>
-        <strong>{label}</strong>: {detail}
-      </>
-    );
-  }
-
   return (
     <div className="word-modal__overlay" onClick={onClose}>
       <div className="word-modal" onClick={(e) => e.stopPropagation()}>
@@ -66,13 +58,25 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
             <p className="word-modal__context-title">
               Contexto recomendado
             </p>
-            <ul className="word-modal__context-reasons">
-              {signals.reasons.map((reason) => (
-                <li key={reason}>{renderReason(reason)}</li>
-              ))}
-            </ul>
+            <ReasonList
+              reasons={signals.reasons}
+              className="word-modal__context-reasons"
+            />
           </div>
         )}
+
+        <TranslationButton
+          text={word}
+          className="word-modal__translate"
+          onTranslated={setTranslation}
+          onUsageChange={setUsageTotal}
+          disabled={hasSavedTranslation}
+        />
+
+        <TranslationUsageCounter
+          totalChars={usageTotal}
+          className="word-modal__usage"
+        />
 
         {loading ? (
           <p className="word-modal__loading">Loading…</p>
@@ -87,9 +91,27 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
         )}
 
         <div className="word-modal__status-group">
-          <button className="word-modal__status-group-button" onClick={() => handleSave(WordStatus.NOT_LEARNED)}>🔴</button>
-          <button className="word-modal__status-group-button" onClick={() => handleSave(WordStatus.LEARNING)}>🟡</button>
-          <button className="word-modal__status-group-button" onClick={() => handleSave(WordStatus.LEARNED)}>🟢</button>
+          <button
+            className="word-modal__status-group-button"
+            onClick={() => handleSave(WordStatus.NOT_LEARNED)}
+          >
+            <span className="word-modal__status-dot word-modal__status-dot--not-learned" />
+            Não aprendida
+          </button>
+          <button
+            className="word-modal__status-group-button"
+            onClick={() => handleSave(WordStatus.LEARNING)}
+          >
+            <span className="word-modal__status-dot word-modal__status-dot--learning" />
+            Aprendendo
+          </button>
+          <button
+            className="word-modal__status-group-button"
+            onClick={() => handleSave(WordStatus.LEARNED)}
+          >
+            <span className="word-modal__status-dot word-modal__status-dot--learned" />
+            Aprendida
+          </button>
         </div>
 
         <button className="word-modal__close" onClick={onClose}>

@@ -1,0 +1,29 @@
+.translate-button {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.translate-button:hover {
+  border-color: var(--blue);
+}
+
+.translate-button:active {
+  transform: scale(0.98);
+  border-color: var(--primary);
+}
+
+.translate-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.translate-button--word-in-phrase {
+  align-self: flex-start;
+  margin-bottom: 6px;
+}

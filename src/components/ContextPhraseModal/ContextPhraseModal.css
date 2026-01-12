@@ -51,28 +51,8 @@
   color: var(--muted);
 }
 
-.phrase-modal__copy {
+.phrase-modal__translate {
   align-self: flex-end;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-
-.phrase-modal__copy:hover {
-  border-color: var(--blue);
-}
-
-.phrase-modal__copy:active {
-  transform: scale(0.98);
-  border-color: var(--primary);
-}
-
-.phrase-modal__copy:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
 }
 
 .phrase-modal__context-alert {
@@ -95,21 +75,51 @@
   font-size: 13px;
 }
 
+.phrase-modal__usage {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .phrase-modal__status-group {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .phrase-modal__status-group-button {
-  font-size: 18px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 6px;
   cursor: pointer;
+  padding: 6px 10px;
 }
 
 .phrase-modal__status-group-button:hover {
   border-color: var(--blue);
+}
+
+.phrase-modal__status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.phrase-modal__status-dot--not-learned {
+  background: var(--danger);
+}
+
+.phrase-modal__status-dot--learning {
+  background: var(--warning);
+}
+
+.phrase-modal__status-dot--learned {
+  background: var(--success);
 }
 
 .phrase-modal__close {

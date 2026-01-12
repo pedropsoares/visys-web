@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { WordStatus } from '../../domain/enums';
 import { fetchWord, persistWord } from '../../services/wordService';
 import type { Word } from '../../domain/entities';
+import { TranslationButton } from '../TranslationButton/TranslationButton';
 
 import './WordInPhrase.css';
 
@@ -29,7 +30,6 @@ export function WordInPhrase({ word }: Props) {
       }
       setDisplayTranslation('-');
       setInputTranslation('');
-      setStatus(WordStatus.NOT_LEARNED);
     } finally {
       setLoading(false);
     }
@@ -57,12 +57,13 @@ export function WordInPhrase({ word }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
+
   async function handleSave() {
     const trimmed = inputTranslation.trim();
     const data: Word = {
       text: word,
       translation: trimmed,
-      status,
+      status: status ?? WordStatus.LEARNING,
       updatedAt: Date.now(),
     };
     await persistWord(data);
@@ -103,6 +104,12 @@ export function WordInPhrase({ word }: Props) {
                 rows={3}
               />
               <div className="word-in-phrase__actions">
+              <TranslationButton
+                text={word}
+                className="translate-button--word-in-phrase"
+                onTranslated={setInputTranslation}
+                disabled={displayTranslation !== '-'}
+              />
                 <button
                   type="button"
                   className="word-in-phrase__save"
