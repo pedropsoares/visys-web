@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextInput } from '../../components/TextInput/TextInput';
+import { TextInput } from '../../components/TextInput';
 import { StatsSummary } from '../../components/StatsSummary/StatsSummary';
 import { useWordStats } from '../../hooks/useWordStats';
 

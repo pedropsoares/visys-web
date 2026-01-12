@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { ContextPhrase } from '../domain/entities';
-import { normalizeText } from '../Utils/context.utils';
+import { normalizeText } from '../utils/context.utils';
 
 export function useWordContexts(
   words: string[],

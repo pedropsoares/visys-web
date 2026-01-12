@@ -1,7 +1,7 @@
 // src/hooks/useWordsMap.ts
 import { useEffect, useState } from 'react';
-import { getAllWords } from '../storage/wordRepository';
-import type { Word } from '../domain/entities/WordEntry';
+import { fetchAllWords } from '../services/wordService';
+import type { Word } from '../domain/entities';
 
 type WordsMap = Record<string, Word>;
 
@@ -13,7 +13,7 @@ export function useWordsMap() {
   const [wordsMap, setWordsMap] = useState<WordsMap>({});
 
   useEffect(() => {
-    getAllWords().then((words) => {
+    fetchAllWords().then((words) => {
       const map: WordsMap = {};
       words.forEach((word) => {
         map[normalizeKey(word.text)] = word;
