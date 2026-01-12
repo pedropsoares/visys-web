@@ -1,9 +1,2 @@
-import React from 'react'
-
-type Props = {
-  text: string
-}
-
-const Word: React.FC<Props> = ({ text }) => <span>{text}</span>
-
-export default Word
+export { Word } from './Word';
+export { Word as default } from './Word';

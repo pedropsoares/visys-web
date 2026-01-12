@@ -3,18 +3,21 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { extractWords } from '../../services/textProcessingService';
 import { WordModal } from '../../components/WordModal/WordModal';
-import { Word } from '../../components/Word/Word';
+import { Word } from '../../components/Word';
 import { useWordsMap } from '../../hooks/useWordsMap';
 
 import './TextInteractive.css';
 import { ContextPhraseModal } from '../../components/ContextPhraseModal/ContextPhraseModal';
-import { useWordContexts } from '../../hooks/useWordContex';
+import { useWordContexts } from '../../hooks/useWordContexts';
 import { useContexts } from '../../hooks/useContexts';
 import {
   analyzeSelectionSignals,
   analyzeWordSignals,
 } from '../../services/contextSignalsService';
-import { findDictionaryMatch } from '../../services/dictionaryService';
+import {
+  buildDictionaryCandidates,
+  findDictionaryMatch,
+} from '../../services/dictionaryService';
 
 export function TextInteractive() {
   const navigate = useNavigate();
@@ -174,62 +177,4 @@ export function TextInteractive() {
       </div>
     </div>
   );
-}
-
-function isWordToken(token: string): boolean {
-  return /[\p{L}\p{M}]/u.test(token);
-}
-
-function getPrevWord(tokens: string[], index: number): string | null {
-  for (let i = index - 1; i >= 0; i -= 1) {
-    if (isWordToken(tokens[i])) return tokens[i];
-  }
-  return null;
-}
-
-function getNextWord(tokens: string[], index: number): string | null {
-  for (let i = index + 1; i < tokens.length; i += 1) {
-    if (isWordToken(tokens[i])) return tokens[i];
-  }
-  return null;
-}
-
-function getNextNextWord(tokens: string[], index: number): string | null {
-  let foundNext = false;
-  for (let i = index + 1; i < tokens.length; i += 1) {
-    if (!isWordToken(tokens[i])) continue;
-    if (!foundNext) {
-      foundNext = true;
-      continue;
-    }
-    return tokens[i];
-  }
-  return null;
-}
-
-function buildDictionaryCandidates(tokens: string[], indexes: number[]): string[] {
-  if (indexes.length === 0) return [];
-
-  const sortedIndexes = [...indexes].sort((a, b) => a - b);
-
-  if (sortedIndexes.length > 1) {
-    return [sortedIndexes.map((i) => tokens[i]).join(' ')].filter(Boolean);
-  }
-
-  const index = sortedIndexes[0];
-  const word = tokens[index];
-  if (!word) return [];
-
-  const prev = getPrevWord(tokens, index);
-  const next = getNextWord(tokens, index);
-  const nextNext = getNextNextWord(tokens, index);
-
-  const candidates = [
-    next ? `${word} ${next}` : null,
-    next && nextNext ? `${word} ${next} ${nextNext}` : null,
-    prev ? `${prev} ${word}` : null,
-    prev && next ? `${prev} ${word} ${next}` : null,
-  ].filter((candidate): candidate is string => Boolean(candidate));
-
-  return candidates.filter((candidate) => candidate.includes(' '));
 }

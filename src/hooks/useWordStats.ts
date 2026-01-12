@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllWords } from '../storage/wordRepository';
+import { fetchAllWords } from '../services/wordService';
 import { WordStatus } from '../domain/enums';
 
 export function useWordStats() {
@@ -11,7 +11,7 @@ export function useWordStats() {
 
   useEffect(() => {
     async function load() {
-      const words = await getAllWords();
+      const words = await fetchAllWords();
 
       setStats({
         learned: words.filter((w) => w.status === WordStatus.LEARNED).length,
