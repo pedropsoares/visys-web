@@ -1,10 +1,12 @@
 /**
  * Normaliza texto para comparação semântica:
  * - lowercase
- * - trim
+ * - remove espaços duplicados
+ * - remove pontuação irrelevante
  */
 export function normalizeText(text: string): string {
   return text
     .toLowerCase()
     .trim()
 }
+

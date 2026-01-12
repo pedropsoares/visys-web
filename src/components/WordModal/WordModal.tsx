@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { WordStatus } from '../../domain/enums';
-import { fetchWord, persistWord } from '../../services/wordService';
-import type { Word } from '../../domain/entities';
+import { saveWord, getWord } from '../../storage/wordRepository';
+import type { Word } from '../../domain/entities/WordEntry';
 import type { ContextSignals } from '../../services/contextSignalsService';
 
 import './WordModal.css';
@@ -19,7 +19,7 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
 
   const load = useCallback(async () => {
     try {
-      const existing = await fetchWord(word);
+      const existing = await getWord(word);
       setTranslation(existing?.translation ?? '');
     } finally {
       setLoading(false);
@@ -37,7 +37,7 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
       status,
       updatedAt: Date.now(),
     };
-    await persistWord(data);
+    await saveWord(data);
     onSaved(data);
     onClose();
   }
