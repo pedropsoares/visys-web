@@ -96,13 +96,22 @@ export function TextInteractive() {
     }
   }, [navigate, rawText]);
 
+  function handlesSeletionIndex(index: number, SelectedIndexes: number[]) {
+    const lastSelected = SelectedIndexes[SelectedIndexes.length - 1];
+
+    return Math.abs(index - lastSelected) > 1;
+  }
+
   function toggleWord(index: number) {
     setSelectedIndexes((prev) => {
+      if (handlesSeletionIndex(index, prev)) return prev;
+
       return prev.includes(index)
         ? prev.filter((i) => i !== index)
         : [...prev, index];
     });
   }
+
 
   function resetSelection() {
     setIsModalOpen(false);
