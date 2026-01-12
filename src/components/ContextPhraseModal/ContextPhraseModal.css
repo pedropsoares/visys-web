@@ -1,0 +1,77 @@
+.phrase-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.phrase-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  min-width: 500px;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phrase-container {
+  display: flex;
+  gap: 16px;
+}
+
+.phrase-modal__title {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.phrase-modal__loading {
+  color: var(--muted);
+}
+
+.phrase-modal__input {
+  width: 100%;
+  resize: none;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.phrase-modal__input::placeholder {
+  color: var(--muted);
+}
+
+.phrase-modal__status-group {
+  display: flex;
+  gap: 8px;
+}
+
+.phrase-modal__status-group-button {
+  font-size: 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.phrase-modal__status-group-button:hover {
+  border-color: var(--blue);
+}
+
+.phrase-modal__close {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
