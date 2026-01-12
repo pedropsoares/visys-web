@@ -17,10 +17,24 @@ Construído com **React + TypeScript + Vite**, 100% frontend.
 - Cada palavra pode ser selecionada individualmente.
 - Pontuação é preservada e não tratada como palavra.
 
+### Contexto e frases
+- Seleção de múltiplas palavras abre um modal de contexto.
+- É possível copiar a frase original em inglês.
+- Traduções individuais podem ser editadas dentro do modal de frase.
+
 ### Registro manual de significado
 - Ao clicar em uma palavra, abre-se um modal flutuante.
 - O usuário escreve o significado com suas próprias palavras.
 - **Não há tradução automática.**
+
+### Sinais heurísticos e recomendação de contexto
+- O sistema detecta sinais de ambiguidade (ex.: sufixos, posição, palavras vizinhas).
+- Identifica candidatos a phrasal verbs/chunks e sugere salvar por contexto.
+- Mostra explicações em português do porquê da recomendação.
+
+### Busca em dicionário (opcional)
+- Integração com `api.dictionaryapi.dev` para detectar expressões conhecidas.
+- Quando encontrado, reforça a recomendação de salvar por contexto.
 
 ### Classificação de aprendizado
 - 🔴 Não aprendida
@@ -51,7 +65,7 @@ src/
   domain/             # Entidades e enums de negócio
   hooks/              # Hooks customizados de estado
   pages/              # Páginas (Home, TextInteractive)
-  services/           # Processamento de texto
+  services/           # Processamento de texto e sinais de contexto
   storage/            # Integração com Firestore
   styles/             # Estilos globais e tema
   main.tsx            # Entry point
@@ -105,6 +119,8 @@ Acesse:
 - **TextInteractive**: Texto renderizado palavra por palavra.
 - **Word**: Representação visual de uma palavra.
 - **WordModal**: Modal flutuante para registrar significado e definir status de aprendizado.
+- **ContextPhraseModal**: Modal para registrar significado por contexto e editar palavras.
+- **WordInPhrase**: Edição rápida de tradução de palavra dentro de um contexto.
 - **StatsSummary**: Estatísticas de vocabulário.
 
 ---
@@ -124,6 +140,19 @@ service cloud.firestore {
   }
 }
 ```
+
+---
+
+## Sinais de contexto (heurísticas)
+
+- Regras simples por texto: sufixos, posição na frase, artigos, partículas e preposições.
+- Recomenda salvar por contexto quando o risco é alto.
+- Explicações aparecem no modal para manter transparência da decisão.
+
+## Dicionário externo
+
+- Integração com `https://api.dictionaryapi.dev`
+- Usado para detectar expressões conhecidas e reforçar a recomendação de contexto.
 
 ---
 
