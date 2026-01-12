@@ -1,3 +1,5 @@
+import { normalizeContext } from '../core/semantic';
+
 type DictionaryResult = {
   term: string;
   found: boolean;
@@ -7,7 +9,7 @@ const dictionaryCache = new Map<string, boolean>();
 const inFlight = new Map<string, Promise<boolean>>();
 
 function normalizeTerm(term: string): string {
-  return term.toLowerCase().trim();
+  return normalizeContext(term);
 }
 
 function isWordToken(token: string): boolean {

@@ -9,6 +9,7 @@ import {
 } from '../../services/contextService';
 import { WordInPhrase } from '../WordInPhrase/WordInPhrase';
 import type { ContextSignals } from '../../services/contextSignalsService';
+import { buildContextId, normalizeContext } from '../../core/semantic';
 import { TranslationButton } from '../TranslationButton/TranslationButton';
 import { ReasonList } from '../ReasonList/ReasonList';
 import { TranslationUsageCounter } from '../TranslationUsageCounter/TranslationUsageCounter';
@@ -17,6 +18,7 @@ import { getTranslationUsage } from '../../services/translationUsageService';
 export type ContextPhraseResult = {
   contextId: string;
   wordIndexes: number[];
+  context: ContextPhrase;
 };
 
 interface Props {
@@ -26,18 +28,6 @@ interface Props {
   signals?: ContextSignals;
   onClose: () => void;
   onSaved: (result: ContextPhraseResult) => void;
-}
-
-function normalizePhrase(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/[^\p{L}\p{N}\s']/gu, '');
-}
-
-function hash(text: string): string {
-  return btoa(text).replace(/=+/g, '').slice(0, 16);
 }
 
 export function ContextPhraseModal({
@@ -65,8 +55,8 @@ export function ContextPhraseModal({
 
   async function handleSave(status: WordStatus) {
     const text = phrase.join(' ');
-    const normalized = normalizePhrase(text);
-    const id = `ctx_${hash(normalized)}`;
+    const normalized = normalizeContext(text);
+    const id = buildContextId(normalized);
 
     const data: ContextPhrase = {
       id,
@@ -79,10 +69,10 @@ export function ContextPhraseModal({
     };
     await persistContextPhrase(data);
 
-
     onSaved({
       contextId: id,
       wordIndexes,
+      context: data,
     });
 
     onClose();

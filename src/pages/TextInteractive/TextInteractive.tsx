@@ -31,20 +31,16 @@ export function TextInteractive() {
   const words = extractWords(rawText);
 
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
-  const [contextsByIndex, setContextsByIndex] = useState<
-    Record<number, string>
-  >({});
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dictionaryMatch, setDictionaryMatch] = useState<string | null>(null);
   function returnHome() {
     navigate('/');
   }
   const { wordsMap, upsertWord } = useWordsMap();
-  const contexts = useContexts();
+  const { contexts, refresh, upsertContext } = useContexts();
   const translationUsage = useTranslationUsage();
 
-  useWordContexts(words, contexts, setContextsByIndex);
+  const contextsByIndex = useWordContexts(words, contexts);
 
   const wordSignals = useMemo(
     () => words.map((_, index) => analyzeWordSignals(words, index)),
@@ -94,15 +90,14 @@ export function TextInteractive() {
     };
   }, [baseSelectionSignals, dictionaryMatch]);
 
-  function handlesSeletionIndex(index: number, SelectedIndexes: number[]) {
-    const lastSelected = SelectedIndexes[SelectedIndexes.length - 1];
+  useEffect(() => {
+    if (!rawText.trim()) {
+      navigate('/');
+    }
+  }, [navigate, rawText]);
 
-    return Math.abs(index - lastSelected) > 1;
-  }
   function toggleWord(index: number) {
     setSelectedIndexes((prev) => {
-      if (handlesSeletionIndex(index, prev)) return prev;
-
       return prev.includes(index)
         ? prev.filter((i) => i !== index)
         : [...prev, index];
@@ -186,14 +181,9 @@ export function TextInteractive() {
               onClose={resetSelection}
               contextPhaseId={contextsByIndex[selectedIndexes[0]]}
               signals={selectionSignals}
-              onSaved={({ contextId, wordIndexes }) => {
-                setContextsByIndex((prev) => {
-                  const updated = { ...prev };
-                  wordIndexes.forEach((i) => {
-                    updated[i] = contextId;
-                  });
-                  return updated;
-                });
+              onSaved={({ context }) => {
+                upsertContext(context);
+                refresh();
               }}
             />
           ))}

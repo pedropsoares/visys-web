@@ -1,3 +1,5 @@
+import { normalizeWord } from '../core/semantic';
+
 type PosGuess = 'noun' | 'verb' | 'adj' | 'adv' | 'unknown';
 
 export type ContextSignals = {
@@ -44,9 +46,6 @@ function isPunctuation(token: string): boolean {
   return /^[\p{P}\p{S}]+$/u.test(token);
 }
 
-function normalizeToken(token: string): string {
-  return token.toLowerCase();
-}
 
 function getPrevWord(tokens: string[], index: number): string | null {
   for (let i = index - 1; i >= 0; i -= 1) {
@@ -95,7 +94,7 @@ export function analyzeWordSignals(
     };
   }
 
-  const lower = normalizeToken(token);
+  const lower = normalizeWord(token);
   const reasons: string[] = [];
   const posHints = new Set<PosGuess>();
 
@@ -114,7 +113,7 @@ export function analyzeWordSignals(
   }
 
   const prevWord = getPrevWord(tokens, index);
-  const prevLower = prevWord ? normalizeToken(prevWord) : null;
+  const prevLower = prevWord ? normalizeWord(prevWord) : null;
 
   if (prevLower && ARTICLES.has(prevLower)) {
     posHints.add('noun');
@@ -133,7 +132,7 @@ export function analyzeWordSignals(
   }
 
   const nextWord = getNextWord(tokens, index);
-  const nextLower = nextWord ? normalizeToken(nextWord) : null;
+  const nextLower = nextWord ? normalizeWord(nextWord) : null;
 
   let isCandidatePhrasalVerb = false;
   let isIdiomaticCandidate = false;
@@ -144,7 +143,7 @@ export function analyzeWordSignals(
   }
 
   const nextNextWord = getNextNextWord(tokens, index);
-  const nextNextLower = nextNextWord ? normalizeToken(nextNextWord) : null;
+  const nextNextLower = nextNextWord ? normalizeWord(nextNextWord) : null;
   if (
     nextNextLower &&
     PARTICLES.has(nextNextLower) &&

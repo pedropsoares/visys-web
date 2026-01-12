@@ -2,12 +2,9 @@
 import { useEffect, useState } from 'react';
 import { fetchAllWords } from '../services/wordService';
 import type { Word } from '../domain/entities';
+import { normalizeWord } from '../core/semantic';
 
 type WordsMap = Record<string, Word>;
-
-function normalizeKey(text: string) {
-  return text.toLowerCase();
-}
 
 export function useWordsMap() {
   const [wordsMap, setWordsMap] = useState<WordsMap>({});
@@ -16,7 +13,7 @@ export function useWordsMap() {
     fetchAllWords().then((words) => {
       const map: WordsMap = {};
       words.forEach((word) => {
-        map[normalizeKey(word.text)] = word;
+        map[normalizeWord(word.text)] = word;
       });
       setWordsMap(map);
     });
@@ -25,7 +22,7 @@ export function useWordsMap() {
   function upsertWord(word: Word) {
     setWordsMap((prev) => ({
       ...prev,
-      [normalizeKey(word.text)]: word,
+      [normalizeWord(word.text)]: word,
     }));
   }
 

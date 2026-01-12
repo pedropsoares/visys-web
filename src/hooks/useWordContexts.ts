@@ -1,15 +1,14 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { ContextPhrase } from '../domain/entities';
-import { normalizeText } from '../utils/context.utils';
+import { normalizeContext } from '../core/semantic';
 
 export function useWordContexts(
   words: string[],
   contexts: ContextPhrase[],
-  setContextsByIndex: React.Dispatch<
-    React.SetStateAction<Record<number, string>>
-  >,
 ) {
-  const normalizedWords = words.map((w) => normalizeText(w)).filter(Boolean);
+  const wordTokens = words
+    .map((value, index) => ({ value, index }))
+    .filter(({ value }) => /[\p{L}\p{M}]/u.test(value));
 
   const computedMap = useMemo(() => {
     if (!contexts.length || !words.length) return {};
@@ -18,32 +17,25 @@ export function useWordContexts(
 
     for (const ctx of contexts) {
       const size = ctx.tokens.length;
+      const normalizedTarget = normalizeContext(ctx.normalizedText || ctx.text);
 
+      for (let i = 0; i <= wordTokens.length - size; i++) {
+        const slice = wordTokens
+          .slice(i, i + size)
+          .map((token) => token.value)
+          .join(' ');
+        const normalizedSlice = normalizeContext(slice);
 
-
-      for (let i = 0; i <= normalizedWords.length - size; i++) {
-        const slice = normalizedWords.slice(i, i + size).join(' ');
-
-        if (slice === normalizeText(ctx.normalizedText)) {
+        if (normalizedSlice === normalizedTarget) {
           for (let j = i; j < i + size; j++) {
-            map[j] = ctx.id;
+            map[wordTokens[j].index] = ctx.id;
           }
         }
       }
     }
 
     return map;
-  }, [contexts, normalizedWords, words.length]);
+  }, [contexts, wordTokens, words.length]);
 
-  useEffect(() => {
-    setContextsByIndex((prev) => {
-      const merged = { ...computedMap, ...prev };
-
-      const same =
-        Object.keys(prev).length === Object.keys(merged).length &&
-        Object.keys(prev).every((k) => prev[Number(k)] === merged[Number(k)]);
-
-      return same ? prev : merged;
-    });
-  }, [computedMap, setContextsByIndex]);
+  return computedMap;
 }

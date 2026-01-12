@@ -1,17 +1,14 @@
 import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import { normalizeWord } from '../core/semantic';
 import type { Word } from '../domain/entities';
 
 const wordsCollection = collection(db, 'words');
 
 const wordCache = new Map<string, Word | null>();
 
-function normalizeKey(text: string) {
-  return text.toLowerCase();
-}
-
 export async function saveWord(word: Word) {
-  const key = normalizeKey(word.text);
+  const key = normalizeWord(word.text);
 
   const safeWord: Word = {
     ...word,
@@ -28,7 +25,7 @@ export async function saveWord(word: Word) {
 }
 
 export async function getWord(text: string): Promise<Word | null> {
-  const key = normalizeKey(text);
+  const key = normalizeWord(text);
 
   if (wordCache.has(key)) {
     return wordCache.get(key) ?? null;
@@ -49,7 +46,7 @@ export async function getAllWords(): Promise<Word[]> {
   try {
     const snap = await getDocs(wordsCollection);
     const list = snap.docs.map((d) => d.data() as Word);
-    list.forEach((w) => wordCache.set(normalizeKey(w.text), w));
+    list.forEach((w) => wordCache.set(normalizeWord(w.text), w));
     return list;
   } catch (error) {
     console.error('getAllWords failed', error);
