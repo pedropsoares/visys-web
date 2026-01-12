@@ -45,6 +45,28 @@
   border-color: var(--danger);
 }
 
+
+.word--context-recommended {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.word--context-recommended::before {
+  content: '!';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--warning);
+  color: var(--surface);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .word--selected {
   color: var(--primary);
   border: 1px solid var(--primary);

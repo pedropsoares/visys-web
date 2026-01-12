@@ -5,6 +5,7 @@ import './ContextPhraseModal.css';
 import type { ContextPhrase } from '../../domain/entities';
 import { getContext, saveContextPhrase } from '../../storage/contextRepository';
 import { WordInPhrase } from '../WordInPhrase/WordInPhrase';
+import type { ContextSignals } from '../../services/contextSignalsService';
 
 export type ContextPhraseResult = {
   contextId: string;
@@ -15,6 +16,7 @@ interface Props {
   phrase: string[];
   wordIndexes: number[];
   contextPhaseId: string;
+  signals?: ContextSignals;
   onClose: () => void;
   onSaved: (result: ContextPhraseResult) => void;
 }
@@ -35,10 +37,35 @@ export function ContextPhraseModal({
   phrase,
   wordIndexes,
   contextPhaseId,
+  signals,
   onClose,
   onSaved,
 }: Props) {
   const [translation, setTranslation] = useState<string | null>('');
+
+  function renderReason(reason: string) {
+    const separatorIndex = reason.indexOf(': ');
+    if (separatorIndex === -1) {
+      return reason;
+    }
+    const label = reason.slice(0, separatorIndex);
+    const detail = reason.slice(separatorIndex + 2);
+    return (
+      <>
+        <strong>{label}</strong>: {detail}
+      </>
+    );
+  }
+
+  async function handleCopyPhrase() {
+    const text = phrase.join(' ');
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Clipboard may be blocked; ignore silently.
+    }
+  }
 
   useEffect(() => {
     if (!contextPhaseId) return;
@@ -82,6 +109,27 @@ export function ContextPhraseModal({
             <WordInPhrase key={`${word}-${index}`} word={word} />
           ))}
         </div>
+
+        <button
+          type="button"
+          className="phrase-modal__copy"
+          onClick={handleCopyPhrase}
+        >
+          Copiar frase (EN)
+        </button>
+
+        {signals && signals.reasons.length > 0 && (
+          <div className="phrase-modal__context-alert">
+            <p className="phrase-modal__context-title">
+              Contexto recomendado
+            </p>
+            <ul className="phrase-modal__context-reasons">
+              {signals.reasons.map((reason) => (
+                <li key={reason}>{renderReason(reason)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {translation === null ? (
           <p className="phrase-modal__loading">Loading…</p>
