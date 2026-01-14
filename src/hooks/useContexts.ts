@@ -1,20 +1,42 @@
-import { useCallback, useEffect, useState } from 'react';
-import { fetchAllContexts } from '../services/contextService';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { fetchContextsByTokens } from '../services/contextService';
 import type { ContextPhrase } from '../domain/entities';
+import { normalizeWord } from '../core/semantic';
 
-export function useContexts() {
+function isWordToken(token: string): boolean {
+  return /[\p{L}\p{M}]/u.test(token);
+}
+
+export function useContexts(tokens: string[] = []) {
   const [contexts, setContexts] = useState<ContextPhrase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const normalizedTokens = useMemo(() => {
+    if (!tokens.length) return [];
+    return Array.from(
+      new Set(
+        tokens.filter(isWordToken).map((token) => normalizeWord(token)),
+      ),
+    );
+  }, [tokens]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await fetchAllContexts();
+      if (normalizedTokens.length === 0) {
+        setContexts([]);
+        return;
+      }
+      const data = await fetchContextsByTokens(normalizedTokens);
       setContexts(data);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load contexts'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [normalizedTokens]);
 
   useEffect(() => {
     refresh();
@@ -30,5 +52,5 @@ export function useContexts() {
     });
   }, []);
 
-  return { contexts, refresh, loading, upsertContext };
+  return { contexts, refresh, loading, error, upsertContext };
 }

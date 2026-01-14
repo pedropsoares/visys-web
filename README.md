@@ -45,9 +45,9 @@ Construído com **React + TypeScript + Vite**, 100% frontend.
 - Palavras, significados e status são salvos no Firestore.
 - Cache em memória evita leituras desnecessárias durante a sessão.
 
-### Tradução via BFF
-- Para evitar expor chaves no frontend, a tradução usa um BFF (visys-bff).
-- O frontend chama `VITE_TRANSLATION_ENDPOINT` apontando para o BFF.
+### Tradução via Firebase Functions
+- A tradução usa Firebase Functions para evitar expor chaves no frontend.
+- O frontend chama a função HTTP `translateHttp` via `VITE_TRANSLATION_ENDPOINT`.
 
 ### Resumo de estatísticas
 - Total de palavras
@@ -77,17 +77,22 @@ src/
 
 ---
 
-## BFF (visys-bff)
+## Firebase Functions (tradução)
 
-O BFF roda separado do frontend e expõe o endpoint `POST /translate` para uso do DeepL.
+O backend de tradução fica em `functions/` e expõe a função HTTP `translateHttp`.
 
-Configuração rápida:
+Variáveis de ambiente necessárias:
 
 ```
-VITE_TRANSLATION_ENDPOINT=http://localhost:8787/translate
+DEEPL_AUTH_KEY=...
+VITE_TRANSLATION_ENDPOINT=http://127.0.0.1:5002/visys-23d3c/us-central1/translateHttp
 ```
 
-Veja detalhes em `visys-bff/README.md`.
+Para rodar localmente com emulador, exporte a variável antes de iniciar:
+
+```
+DEEPL_AUTH_KEY=... firebase emulators:start --only functions --project visys-23d3c
+```
 
 ---
 
@@ -118,6 +123,7 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
+VITE_FIREBASE_FUNCTIONS_EMULATOR=localhost:5002
 ```
 
 4. **Rode o projeto**
@@ -147,12 +153,22 @@ Acesse:
 
 - Firestore é usado como banco principal.
 - Não há backend intermediário.
-- Regras simples para desenvolvimento:
+- Coleções: `words`, `contexts`, `texts`, `context_links`.
+- Regras simples para desenvolvimento (arquivo `firestore.rules`):
 
 ```js
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    match /words/{docId} {
+      allow read, write: if true;
+    }
+    match /contexts/{docId} {
+      allow read, write: if true;
+    }
+    match /texts/{docId} {
+      allow read, write: if true;
+    }
+    match /context_links/{docId} {
       allow read, write: if true;
     }
   }

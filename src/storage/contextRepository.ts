@@ -1,4 +1,12 @@
-import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  query,
+  where,
+} from 'firebase/firestore';
 import { db } from './firebase';
 import type { ContextPhrase } from '../domain/entities';
 
@@ -19,4 +27,38 @@ export async function getContext(id: string): Promise<ContextPhrase | null> {
 export async function getAllContexts(): Promise<ContextPhrase[]> {
   const snap = await getDocs(collection(db, 'contexts'));
   return snap.docs.map((d) => d.data() as ContextPhrase);
+}
+
+export async function getContextsByTokens(
+  tokens: string[],
+): Promise<ContextPhrase[]> {
+  const uniqueTokens = Array.from(new Set(tokens.filter(Boolean)));
+  if (uniqueTokens.length === 0) return [];
+
+  const chunkSize = 10;
+  const results: ContextPhrase[] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < uniqueTokens.length; i += chunkSize) {
+    const chunk = uniqueTokens.slice(i, i + chunkSize);
+    try {
+      const q = query(COLLECTION, where('normalizedTokens', 'array-contains-any', chunk));
+      const snap = await getDocs(q);
+      snap.docs.forEach((docSnap) => {
+        const data = docSnap.data() as ContextPhrase;
+        if (!seen.has(data.id)) {
+          seen.add(data.id);
+          results.push(data);
+        }
+      });
+    } catch (error) {
+      console.error('getContextsByTokens failed', error);
+    }
+  }
+
+  if (results.length === 0) {
+    return getAllContexts();
+  }
+
+  return results;
 }

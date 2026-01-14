@@ -21,6 +21,7 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
   const [translation, setTranslation] = useState('');
   const [loading, setLoading] = useState(true);
   const [usageTotal, setUsageTotal] = useState(() => getTranslationUsage());
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const hasSavedTranslation = Boolean(translation.trim());
 
   const load = useCallback(async () => {
@@ -68,10 +69,18 @@ export function WordModal({ word, signals, onClose, onSaved }: Props) {
         <TranslationButton
           text={word}
           className="word-modal__translate"
-          onTranslated={setTranslation}
+          onTranslated={(value) => {
+            setTranslateError(null);
+            setTranslation(value);
+          }}
           onUsageChange={setUsageTotal}
+          onError={() => setTranslateError('Falha ao traduzir. Tente novamente.')}
           disabled={hasSavedTranslation}
         />
+
+        {translateError && (
+          <p className="word-modal__error">{translateError}</p>
+        )}
 
         <TranslationUsageCounter
           totalChars={usageTotal}

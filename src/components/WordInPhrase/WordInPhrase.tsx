@@ -16,6 +16,7 @@ export function WordInPhrase({ word }: Props) {
   const [status, setStatus] = useState<WordStatus>(WordStatus.NOT_LEARNED);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
@@ -107,7 +108,11 @@ export function WordInPhrase({ word }: Props) {
               <TranslationButton
                 text={word}
                 className="translate-button--word-in-phrase"
-                onTranslated={setInputTranslation}
+                onTranslated={(value) => {
+                  setTranslateError(null);
+                  setInputTranslation(value);
+                }}
+                onError={() => setTranslateError('Falha ao traduzir.')}
                 disabled={displayTranslation !== '-'}
               />
                 <button
@@ -118,6 +123,9 @@ export function WordInPhrase({ word }: Props) {
                   Salvar
                 </button>
               </div>
+              {translateError && (
+                <p className="word-in-phrase__error">{translateError}</p>
+              )}
             </>
           )}
         </div>

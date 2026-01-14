@@ -47,3 +47,19 @@
 .home__active-text-button:hover {
   border-color: var(--blue);
 }
+
+.home__status {
+  margin: 0 0 12px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.home__status--loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home__status--error {
+  color: var(--danger);
+}

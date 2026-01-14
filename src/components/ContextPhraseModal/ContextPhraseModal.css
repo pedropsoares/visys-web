@@ -81,6 +81,12 @@
   font-size: 12px;
 }
 
+.phrase-modal__error {
+  margin: 6px 0 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .phrase-modal__status-group {
   display: flex;
   gap: 8px;

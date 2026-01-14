@@ -78,6 +78,12 @@
   font-size: 12px;
 }
 
+.word-modal__error {
+  margin: 6px 0 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .word-modal__status-group {
   display: flex;
   gap: 8px;

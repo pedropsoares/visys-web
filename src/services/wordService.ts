@@ -1,8 +1,17 @@
 import type { Word } from '../domain/entities';
-import { getAllWords, getWord, saveWord } from '../storage/wordRepository';
+import {
+  getAllWords,
+  getWord,
+  saveWord,
+  getWordsByKeys,
+} from '../storage/wordRepository';
 
 export async function fetchAllWords(): Promise<Word[]> {
   return getAllWords();
+}
+
+export async function fetchWordsByKeys(keys: string[]): Promise<Word[]> {
+  return getWordsByKeys(keys);
 }
 
 export async function fetchWord(text: string): Promise<Word | null> {

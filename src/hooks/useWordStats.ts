@@ -8,21 +8,31 @@ export function useWordStats() {
     learning: 0,
     notLearned: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     async function load() {
-      const words = await fetchAllWords();
+      setLoading(true);
+      setError(null);
+      try {
+        const words = await fetchAllWords();
 
-      setStats({
-        learned: words.filter((w) => w.status === WordStatus.LEARNED).length,
-        learning: words.filter((w) => w.status === WordStatus.LEARNING).length,
-        notLearned: words.filter((w) => w.status === WordStatus.NOT_LEARNED)
-          .length,
-      });
+        setStats({
+          learned: words.filter((w) => w.status === WordStatus.LEARNED).length,
+          learning: words.filter((w) => w.status === WordStatus.LEARNING).length,
+          notLearned: words.filter((w) => w.status === WordStatus.NOT_LEARNED)
+            .length,
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to load stats'));
+      } finally {
+        setLoading(false);
+      }
     }
 
     load();
   }, []);
 
-  return stats;
+  return { ...stats, loading, error };
 }

@@ -10,6 +10,7 @@ interface Props {
   label?: string;
   onTranslated?: (translated: string) => void;
   onUsageChange?: (totalChars: number) => void;
+  onError?: (error: Error) => void;
   disabled?: boolean;
 }
 
@@ -19,6 +20,7 @@ export function TranslationButton({
   label = 'Tradução',
   onTranslated,
   onUsageChange,
+  onError,
   disabled,
 }: Props) {
   const [loading, setLoading] = useState(false);
@@ -37,6 +39,9 @@ export function TranslationButton({
       onUsageChange?.(total);
     } catch (error) {
       console.error('translateText failed', error);
+      const safeError =
+        error instanceof Error ? error : new Error('Translation failed');
+      onError?.(safeError);
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,7 @@ import { removeActiveText } from '../../services/textService';
 import './TextInteractive.css';
 import { ContextPhraseModal } from '../../components/ContextPhraseModal/ContextPhraseModal';
 import { useWordContexts } from '../../hooks/useWordContexts';
+import { useContextLinks } from '../../hooks/useContextLinks';
 import { useContexts } from '../../hooks/useContexts';
 import {
   analyzeSelectionSignals,
@@ -22,13 +23,19 @@ import {
   buildDictionaryCandidates,
   findDictionaryMatch,
 } from '../../services/dictionaryService';
+import { normalizeWord } from '../../core/semantic';
+import { persistContextLink } from '../../services/contextService';
 
 export function TextInteractive() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { activeText } = useActiveText();
+  const {
+    activeText,
+    loading: activeTextLoading,
+    error: activeTextError,
+  } = useActiveText();
   const rawText = state?.text ?? activeText?.rawText ?? '';
-  const words = extractWords(rawText);
+  const words = useMemo(() => extractWords(rawText), [rawText]);
 
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,11 +43,28 @@ export function TextInteractive() {
   function returnHome() {
     navigate('/');
   }
-  const { wordsMap, upsertWord } = useWordsMap();
-  const { contexts, refresh, upsertContext } = useContexts();
+  const {
+    wordsMap,
+    upsertWord,
+    loading: wordsLoading,
+    error: wordsError,
+  } = useWordsMap(words);
+  const {
+    contexts,
+    upsertContext,
+    loading: contextsLoading,
+    error: contextsError,
+  } = useContexts(words);
   const translationUsage = useTranslationUsage();
 
-  const contextsByIndex = useWordContexts(words, contexts);
+  const textId = activeText?.id ?? 'active';
+  const {
+    links: contextLinks,
+    loading: linksLoading,
+    error: linksError,
+  } = useContextLinks(textId);
+
+  const contextsByIndex = useWordContexts(words, contexts, contextLinks);
 
   const wordSignals = useMemo(
     () => words.map((_, index) => analyzeWordSignals(words, index)),
@@ -51,6 +75,22 @@ export function TextInteractive() {
     () => analyzeSelectionSignals(words, selectedIndexes),
     [words, selectedIndexes],
   );
+
+  const canRenderWords = useMemo(() => {
+    return (
+      !wordsLoading &&
+      !contextsLoading &&
+      !wordsError &&
+      !contextsError &&
+      !activeTextError
+    );
+  }, [
+    activeTextError,
+    contextsError,
+    contextsLoading,
+    wordsError,
+    wordsLoading,
+  ]);
 
   useEffect(() => {
     let isActive = true;
@@ -91,27 +131,27 @@ export function TextInteractive() {
   }, [baseSelectionSignals, dictionaryMatch]);
 
   useEffect(() => {
+    if (activeTextLoading) return;
     if (!rawText.trim()) {
       navigate('/');
     }
-  }, [navigate, rawText]);
-
-  function handlesSeletionIndex(index: number, SelectedIndexes: number[]) {
-    const lastSelected = SelectedIndexes[SelectedIndexes.length - 1];
-
-    return Math.abs(index - lastSelected) > 1;
-  }
+  }, [activeTextLoading, navigate, rawText]);
 
   function toggleWord(index: number) {
     setSelectedIndexes((prev) => {
-      if (handlesSeletionIndex(index, prev)) return prev;
-
-      return prev.includes(index)
+      const next = prev.includes(index)
         ? prev.filter((i) => i !== index)
         : [...prev, index];
+
+      if (next.length === 0) return [];
+      const minIndex = Math.min(...next);
+      const maxIndex = Math.max(...next);
+      return Array.from(
+        { length: maxIndex - minIndex + 1 },
+        (_, i) => minIndex + i,
+      );
     });
   }
-
 
   function resetSelection() {
     setIsModalOpen(false);
@@ -138,42 +178,57 @@ export function TextInteractive() {
           </button>
           <TranslationUsageCounter totalChars={translationUsage} />
         </div>
+        {(wordsLoading || contextsLoading || linksLoading) && (
+          <p className="text-interactive__status text-interactive__status--loading">
+            <span className="spinner" />
+            Carregando dados salvos…
+          </p>
+        )}
+        {(wordsError || contextsError || activeTextError || linksError) && (
+          <p className="text-interactive__status text-interactive__status--error">
+            Falha ao carregar dados salvos.
+          </p>
+        )}
 
-        <div className="text-interactive__words">
-          {words.map((word, index) => {
-            const key = word.toLowerCase();
-            const signal = wordSignals[index];
-            return (
-              <Word
-                key={`${word}-${index}`}
-                text={word}
-                status={wordsMap[key]?.status}
-                isSelected={selectedIndexes.includes(index)}
-                contextId={contextsByIndex[index] ?? ''}
-                contextRecommendation={signal?.recommendation === 'context'}
-                onClick={() => toggleWord(index)}
-              />
-            );
-          })}
-        </div>
+        {canRenderWords && (
+          <>
+            <div className="text-interactive__words">
+              {words.map((word, index) => {
+                const key = word.toLowerCase();
+                const signal = wordSignals[index];
+                return (
+                  <Word
+                    key={`${word}-${index}`}
+                    text={word}
+                    status={wordsMap[key]?.status}
+                    isSelected={selectedIndexes.includes(index)}
+                    contextId={contextsByIndex[index] ?? ''}
+                    contextRecommendation={signal?.recommendation === 'context'}
+                    onClick={() => toggleWord(index)}
+                  />
+                );
+              })}
+            </div>
 
-        <div className="text-interactive__footer">
-          <button
-            className="text-interactive__finish"
-            onClick={handleFinishText}
-            disabled={!activeText}
-          >
-            Concluir texto
-          </button>
+            <div className="text-interactive__footer">
+              <button
+                className="text-interactive__finish"
+                onClick={handleFinishText}
+                disabled={!activeText}
+              >
+                Concluir texto
+              </button>
 
-          <button
-            className="text-interactive__button__translate-button"
-            disabled={selectedIndexes.length === 0}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Traduzir seleção
-          </button>
-        </div>
+              <button
+                className="text-interactive__button__translate-button"
+                disabled={selectedIndexes.length === 0}
+                onClick={() => setIsModalOpen(true)}
+              >
+                Traduzir seleção
+              </button>
+            </div>
+          </>
+        )}
 
         {isModalOpen &&
           (selectedIndexes.length === 1 ? (
@@ -190,9 +245,18 @@ export function TextInteractive() {
               onClose={resetSelection}
               contextPhaseId={contextsByIndex[selectedIndexes[0]]}
               signals={selectionSignals}
-              onSaved={({ context }) => {
+              onSaved={async ({ context }) => {
                 upsertContext(context);
-                refresh();
+                await persistContextLink({
+                  textId,
+                  contextId: context.id,
+                  wordIndexes: selectedIndexes,
+                  normalizedTokens: selectedWords
+                    .filter((token) => /[\p{L}\p{M}]/u.test(token))
+                    .map((token) => normalizeWord(token)),
+                  tokenCount: selectedWords.length,
+                  updatedAt: Date.now(),
+                });
               }}
             />
           ))}

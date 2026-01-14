@@ -1,4 +1,13 @@
-import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  query,
+  where,
+  documentId,
+} from 'firebase/firestore';
 import { db } from './firebase';
 import { normalizeWord } from '../core/semantic';
 import type { Word } from '../domain/entities';
@@ -52,4 +61,54 @@ export async function getAllWords(): Promise<Word[]> {
     console.error('getAllWords failed', error);
     return [];
   }
+}
+
+export async function getWordsByKeys(keys: string[]): Promise<Word[]> {
+  const normalizedKeys = Array.from(
+    new Set(keys.map((key) => normalizeWord(key)).filter(Boolean)),
+  );
+  if (normalizedKeys.length === 0) return [];
+
+  const cachedWords: Word[] = [];
+  const missingKeys: string[] = [];
+
+  normalizedKeys.forEach((key) => {
+    if (wordCache.has(key)) {
+      const cached = wordCache.get(key);
+      if (cached) cachedWords.push(cached);
+    } else {
+      missingKeys.push(key);
+    }
+  });
+
+  if (missingKeys.length === 0) {
+    return cachedWords;
+  }
+
+  const results: Word[] = [...cachedWords];
+  const chunkSize = 10;
+  for (let i = 0; i < missingKeys.length; i += chunkSize) {
+    const chunk = missingKeys.slice(i, i + chunkSize);
+    try {
+      const q = query(wordsCollection, where(documentId(), 'in', chunk));
+      const snap = await getDocs(q);
+      const list = snap.docs.map((d) => d.data() as Word);
+      const foundKeys = new Set<string>();
+      list.forEach((word) => {
+        const key = normalizeWord(word.text);
+        foundKeys.add(key);
+        wordCache.set(key, word);
+      });
+      chunk.forEach((key) => {
+        if (!foundKeys.has(key)) {
+          wordCache.set(key, null);
+        }
+      });
+      results.push(...list);
+    } catch (error) {
+      console.error('getWordsByKeys failed', error);
+    }
+  }
+
+  return results;
 }

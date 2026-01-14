@@ -15,7 +15,7 @@ export function Home() {
   const navigate = useNavigate();
   const stats = useWordStats();
   const translationUsage = useTranslationUsage();
-  const { activeText, loading } = useActiveText();
+  const { activeText, loading, error: activeTextError } = useActiveText();
 
   function handleSubmit() {
     if (!text.trim()) return;
@@ -32,6 +32,17 @@ export function Home() {
       </div>
 
       <StatsSummary learned={stats.learned} learning={stats.learning} />
+      {stats.loading && (
+        <p className="home__status home__status--loading">
+          <span className="spinner" />
+          Carregando estatísticas…
+        </p>
+      )}
+      {stats.error && (
+        <p className="home__status home__status--error">
+          Falha ao carregar estatísticas.
+        </p>
+      )}
 
       <TranslationUsageCounter totalChars={translationUsage} />
 
@@ -53,6 +64,11 @@ export function Home() {
             Continuar texto
           </button>
         </div>
+      )}
+      {activeTextError && (
+        <p className="home__status home__status--error">
+          Falha ao carregar texto em andamento.
+        </p>
       )}
 
       <TextInput

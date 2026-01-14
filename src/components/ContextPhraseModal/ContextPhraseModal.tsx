@@ -9,7 +9,11 @@ import {
 } from '../../services/contextService';
 import { WordInPhrase } from '../WordInPhrase/WordInPhrase';
 import type { ContextSignals } from '../../services/contextSignalsService';
-import { buildContextId, normalizeContext } from '../../core/semantic';
+import {
+  buildContextId,
+  normalizeContext,
+  normalizeWord,
+} from '../../core/semantic';
 import { TranslationButton } from '../TranslationButton/TranslationButton';
 import { ReasonList } from '../ReasonList/ReasonList';
 import { TranslationUsageCounter } from '../TranslationUsageCounter/TranslationUsageCounter';
@@ -40,9 +44,13 @@ export function ContextPhraseModal({
 }: Props) {
   const [translation, setTranslation] = useState<string | null>('');
   const [usageTotal, setUsageTotal] = useState(() => getTranslationUsage());
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const hasSavedTranslation = Boolean(translation?.trim());
 
   const phraseText = phrase.join(' ');
+  const normalizedTokens = phrase
+    .filter((token) => /[\p{L}\p{M}]/u.test(token))
+    .map((token) => normalizeWord(token));
 
   useEffect(() => {
     if (!contextPhaseId) return;
@@ -62,6 +70,7 @@ export function ContextPhraseModal({
       id,
       text,
       tokens: phrase,
+      normalizedTokens,
       translation: translation?.trim() ?? '',
       status,
       normalizedText: normalized,
@@ -90,8 +99,12 @@ export function ContextPhraseModal({
         <TranslationButton
           text={phraseText}
           className="phrase-modal__translate"
-          onTranslated={setTranslation}
+          onTranslated={(value) => {
+            setTranslateError(null);
+            setTranslation(value);
+          }}
           onUsageChange={setUsageTotal}
+          onError={() => setTranslateError('Falha ao traduzir. Tente novamente.')}
           disabled={hasSavedTranslation}
         />
 
@@ -99,6 +112,10 @@ export function ContextPhraseModal({
           totalChars={usageTotal}
           className="phrase-modal__usage"
         />
+
+        {translateError && (
+          <p className="phrase-modal__error">{translateError}</p>
+        )}
 
         {signals && signals.reasons.length > 0 && (
           <div className="phrase-modal__context-alert">

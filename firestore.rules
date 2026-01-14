@@ -1,0 +1,16 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /words/{docId} {
+      allow read, write: if true;
+    }
+    match /contexts/{docId} {
+      allow read, write: if true;
+    }
+    match /texts/{docId} {
+      allow read, write: if true;
+    }
+    match /context_links/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
