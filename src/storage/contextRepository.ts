@@ -60,5 +60,14 @@ export async function getContextsByTokens(
     return getAllContexts();
   }
 
+  const legacyContexts = await getAllContexts();
+
+  legacyContexts.forEach((context) => {
+    if (!context.normalizedTokens?.length && !seen.has(context.id)) {
+      seen.add(context.id);
+      results.push(context);
+    }
+  });
+
   return results;
 }

@@ -2,61 +2,58 @@
 
 Visys é um sistema de consciência vocabular em inglês, focado em leitura ativa de textos reais.
 Ele não traduz automaticamente: o aprendizado acontece quando o usuário interpreta, registra e acompanha seu próprio vocabulário.
+A tradução existe apenas como apoio sob demanda (botão), nunca como preenchimento automático obrigatório.
 
-Construído com **React + TypeScript + Vite**, 100% frontend.
+Frontend em **React + TypeScript + Vite**, com **Firebase** (Firestore para persistência e Functions para tradução opcional).
+
+---
+
+## Como funciona (fluxo rápido)
+
+1. Cole ou digite um texto em inglês (limite de 1665 caracteres).
+2. O texto é tokenizado e exibido palavra por palavra, preservando pontuação.
+3. Clique para selecionar uma palavra ou um trecho contínuo e use **"Traduzir seleção"** para abrir o modal.
+4. Registre o significado e o status de aprendizado.
+5. As palavras e contextos ficam salvos e são destacados quando você volta ao texto.
 
 ---
 
 ## Funcionalidades
 
-### Leitura de texto em inglês
-- O usuário cola ou digita um texto real.
-- O sistema processa o texto e o exibe de forma interativa.
+### Texto em andamento
+- O texto colado é salvo como "ativo" e pode ser retomado depois.
+- O botão **Concluir texto** remove o texto ativo e libera um novo.
 
-### Palavras clicáveis
-- Cada palavra pode ser selecionada individualmente.
-- Pontuação é preservada e não tratada como palavra.
+### Leitura interativa por tokens
+- Palavras clicáveis; pontuação é exibida mas não vira palavra.
+- Seleções são contíguas, permitindo salvar uma palavra ou uma frase inteira.
 
-### Contexto e frases
-- Seleção de múltiplas palavras abre um modal de contexto.
-- É possível copiar a frase original em inglês.
-- Traduções individuais podem ser editadas dentro do modal de frase.
+### Modais de palavra e de contexto
+- 1 palavra → **WordModal**.
+- 2+ palavras → **ContextPhraseModal**.
+- No modal de frase, cada palavra pode ter tradução/nota própria via **WordInPhrase**.
 
-### Registro manual de significado
-- Ao clicar em uma palavra, abre-se um modal flutuante.
+### Registro de significado + status
 - O usuário escreve o significado com suas próprias palavras.
-- **Não há tradução automática.**
+- Status: 🔴 Não aprendida, 🟡 Em aprendizado, 🟢 Aprendida.
+
+### Tradução assistida (opcional)
+- Botão de tradução usa DeepL via Firebase Functions.
+- Contador de uso de caracteres (janela de 30 dias) salvo no navegador.
 
 ### Sinais heurísticos e recomendação de contexto
-- O sistema detecta sinais de ambiguidade (ex.: sufixos, posição, palavras vizinhas).
-- Identifica candidatos a phrasal verbs/chunks e sugere salvar por contexto.
-- Mostra explicações em português do porquê da recomendação.
+- Heurísticas de sufixos, posição e partículas sugerem salvar por contexto.
+- A recomendação mostra o motivo em português e marca a palavra com um indicador visual.
 
 ### Busca em dicionário (opcional)
-- Integração com `api.dictionaryapi.dev` para detectar expressões conhecidas.
-- Quando encontrado, reforça a recomendação de salvar por contexto.
+- Integração com `api.dictionaryapi.dev` para detectar expressões.
+- Reforça a recomendação de salvar por contexto quando encontra um match.
 
-### Classificação de aprendizado
-- 🔴 Não aprendida
-- 🟡 Em aprendizado
-- 🟢 Aprendida
-
-### Persistência de progresso
-- Palavras, significados e status são salvos no Firestore.
-- Cache em memória evita leituras desnecessárias durante a sessão.
-
-### Tradução via Firebase Functions
-- A tradução usa Firebase Functions para evitar expor chaves no frontend.
-- O frontend chama a função HTTP `translateHttp` via `VITE_TRANSLATION_ENDPOINT`.
-
-### Resumo de estatísticas
-- Total de palavras
-- Distribuição por status
+### Estatísticas rápidas
+- A Home mostra contadores de **aprendidas** e **em aprendizado**.
 
 ### Interface moderna
-- Tema escuro
-- CSS com variáveis customizadas
-- Componentes simples e responsivos
+- Tema escuro com CSS variables, componentes simples e responsivos.
 
 ---
 
@@ -66,6 +63,7 @@ Construído com **React + TypeScript + Vite**, 100% frontend.
 src/
   app/                # App principal e rotas
   components/         # Componentes reutilizáveis
+  core/semantic/      # Tokenização e normalização
   domain/             # Entidades e enums de negócio
   hooks/              # Hooks customizados de estado
   pages/              # Páginas (Home, TextInteractive)
@@ -73,22 +71,30 @@ src/
   storage/            # Integração com Firestore
   styles/             # Estilos globais e tema
   main.tsx            # Entry point
+functions/            # Cloud Functions (DeepL)
 ```
 
 ---
 
-## Firebase Functions (tradução)
+## Tradução via Firebase Functions (opcional)
 
-O backend de tradução fica em `functions/` e expõe a função HTTP `translateHttp`.
+O backend de tradução fica em `functions/` e expõe:
+- `translateHttp` (HTTP) — usado pelo frontend via `VITE_TRANSLATION_ENDPOINT`.
+- `translate` (callable) — disponível para uso futuro.
 
-Variáveis de ambiente necessárias:
+Variáveis necessárias:
 
+Frontend (`.env`):
+```
+VITE_TRANSLATION_ENDPOINT=...
+```
+
+Functions (`functions/.env`):
 ```
 DEEPL_AUTH_KEY=...
-VITE_TRANSLATION_ENDPOINT=http://127.0.0.1:5002/visys-23d3c/us-central1/translateHttp
 ```
 
-Para rodar localmente com emulador, exporte a variável antes de iniciar:
+Para rodar localmente com emulador:
 
 ```
 DEEPL_AUTH_KEY=... firebase emulators:start --only functions --project visys-23d3c
@@ -112,7 +118,7 @@ yarn
 # ou npm install
 ```
 
-3. **Configure o Firebase**
+3. **Configure o Firebase (frontend)**
 
 Crie um arquivo `.env`:
 
@@ -123,7 +129,9 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
-VITE_FIREBASE_FUNCTIONS_EMULATOR=localhost:5002
+VITE_FIREBASE_MEASUREMENT_ID=... # opcional
+VITE_FIREBASE_FUNCTIONS_EMULATOR=localhost:5002 # opcional
+VITE_TRANSLATION_ENDPOINT=http://127.0.0.1:5002/visys-23d3c/us-central1/translateHttp # opcional
 ```
 
 4. **Rode o projeto**
@@ -135,25 +143,36 @@ yarn dev
 Acesse:
 👉 http://localhost:5173
 
+Se quiser rodar tudo junto (app + emulador de Functions):
+
+```bash
+yarn dev:all
+```
+
 ---
 
 ## Principais Componentes
 
-- **Home**: Entrada de texto e visão geral.
-- **TextInteractive**: Texto renderizado palavra por palavra.
-- **Word**: Representação visual de uma palavra.
-- **WordModal**: Modal flutuante para registrar significado e definir status de aprendizado.
-- **ContextPhraseModal**: Modal para registrar significado por contexto e editar palavras.
-- **WordInPhrase**: Edição rápida de tradução de palavra dentro de um contexto.
-- **StatsSummary**: Estatísticas de vocabulário.
+- **Home**: Entrada de texto, estatísticas e acesso ao texto em andamento.
+- **TextInteractive**: Texto renderizado palavra por palavra com seleção.
+- **TextInput**: Campo de texto com limite de caracteres.
+- **Word**: Representação visual de uma palavra/pontuação.
+- **WordModal**: Modal para registrar significado e status.
+- **ContextPhraseModal**: Modal para salvar contexto de frases.
+- **WordInPhrase**: Edição rápida de tradução por palavra dentro do contexto.
+- **TranslationButton**: Botão de tradução sob demanda.
+- **TranslationUsageCounter**: Contador de uso de caracteres da tradução.
+- **ReasonList**: Lista de motivos para recomendação de contexto.
+- **StatsSummary**: Estatísticas rápidas de aprendizado.
 
 ---
 
 ## Persistência (Firestore)
 
 - Firestore é usado como banco principal.
-- Não há backend intermediário.
 - Coleções: `words`, `contexts`, `texts`, `context_links`.
+- `texts` guarda o texto ativo; `context_links` mapeia contexto → índices do texto.
+- Cache em memória evita leituras repetidas de palavras; uso de tradução fica no `localStorage`.
 - Regras simples para desenvolvimento (arquivo `firestore.rules`):
 
 ```js
@@ -193,8 +212,10 @@ service cloud.firestore {
 ## Scripts
 
 - `yarn dev` — desenvolvimento
+- `yarn dev:all` — app + emulador de Functions
 - `yarn build` — build de produção
 - `yarn lint` — lint
+- `yarn preview` — preview do build
 
 ---
 

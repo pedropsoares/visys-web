@@ -12,7 +12,8 @@ import type { ContextLink } from '../domain/entities';
 const COLLECTION = collection(db, 'context_links');
 
 export async function saveContextLink(link: ContextLink): Promise<void> {
-  const id = `${link.textId}_${link.contextId}`;
+  const wordIndexKey = link.wordIndexes.join('-');
+  const id = `${link.textId}_${link.contextId}_${wordIndexKey}`;
   await setDoc(doc(COLLECTION, id), link, { merge: true });
 }
 
