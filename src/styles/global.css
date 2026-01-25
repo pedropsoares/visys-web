@@ -58,6 +58,10 @@ body {
 .page {
   margin: 48px;
   height: 1px;
+
+  @media (max-width: 600px) {
+    margin: 24px 0
+  }
 }
 
 button {
